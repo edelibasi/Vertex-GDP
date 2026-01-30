@@ -1,0 +1,5 @@
+﻿  Phone.cpp
+C:\Users\emred\Vertex-Projects\VertexGDP-Emre\Week2\Week2\Phone.cpp(66,9): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+  Week2.cpp
+  Generating Code...
+  Week2.vcxproj -> C:\Users\emred\Vertex-Projects\VertexGDP-Emre\Week1\x64\Debug\Week2.exe
