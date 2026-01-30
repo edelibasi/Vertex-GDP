@@ -5,7 +5,8 @@ enum CharacterAction : int
 {
 	Attack,
 	Parry,
-	Defend
+	Defend,
+	Heal
 };
 
 class Character
