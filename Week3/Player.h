@@ -3,7 +3,8 @@
 
 class Player : public Character
 {
-	Player(float Health, int Lives, float AttackPower);
+	Player(std::string Name, int Health, int Lives, int AttackPower, int Armor);
 
+	std::string ChooseAction() override;
 };
 

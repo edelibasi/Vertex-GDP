@@ -1,16 +1,16 @@
 #include "Character.h"
 #include <iostream>
 
-Character::Character(float Health, int Lives, float AttackPower)
-	: Health(Health), Lives(Lives), AttackPower(AttackPower)
+Character::Character(std::string Name, int Health, int Lives, int AttackPower, int Armor)
+	: Name(Name), Health(Health), Lives(Lives), AttackPower(AttackPower), Armor(Armor)
 {}
 
 bool Character::IsAlive() const
 {
-	return Health > 0.0f;
+	return Health > 0;
 }
 
-void Character::UpdateHealth(float InHealth)
+void Character::UpdateHealth(int InHealth)
 {
 	Health += InHealth;
 	std::cout << "Current Health: " << Health << std::endl;
