@@ -5,11 +5,6 @@ Character::Character(std::string Name, int Health, int Lives, int AttackPower, i
 	: Name(Name), Health(Health), Lives(Lives), AttackPower(AttackPower), Armor(Armor)
 {}
 
-bool Character::IsAlive() const
-{
-	return Health > 0;
-}
-
 void Character::UpdateHealth(int InHealth)
 {
 	Health += InHealth;

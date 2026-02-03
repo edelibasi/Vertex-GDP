@@ -5,7 +5,7 @@ Enemy::Enemy(std::string Name, int Health, int Lives, int AttackPower, int Armor
 	: Character(Name, Health, Lives, AttackPower, Armor), Generator(std::random_device{}()), Distribution(0, 3)
 {}
 
-std::string Enemy::ChooseAction()
+CharacterAction Enemy::ChooseAction()
 {
 	switch (CharacterAction(Distribution(Generator)))
 	{
@@ -20,16 +20,13 @@ std::string Enemy::ChooseAction()
 	case Defend:
 		break;
 
-	case Heal:
-		break;
-
 	default:
 		throw std::runtime_error("Invalid action chosen by Enemy.");
 		break;
 	}
 }
 
-void Enemy::IncreaseStrength(int RoundNumber)
+void Enemy::IncreaseDifficulty(int RoundNumber)
 {
 	switch (RoundNumber)
 	{
@@ -39,22 +36,26 @@ void Enemy::IncreaseStrength(int RoundNumber)
 	case 2:
 		Health += RoundNumber;
 		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
+		Name = "Goblin Warrior";
 		break;
 	case 3:
 		AttackPower += RoundNumber;
 		Health += RoundNumber;
 		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
+		Name = "Gladiator";
 		break;
 	case 4:
 		AttackPower += RoundNumber;
 		Health += RoundNumber;
 		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
+		Name = "Berserker";
 		break;
 	case 5:
 		AttackPower += RoundNumber;
 		Health += RoundNumber;
 		Armor += RoundNumber / 2;
 		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
+		Name = "Knight Champion";
 		break;
 
 	default:

@@ -3,8 +3,9 @@
 
 class Player : public Character
 {
+public:
 	Player(std::string Name, int Health, int Lives, int AttackPower, int Armor);
 
-	std::string ChooseAction() override;
+	CharacterAction ChooseAction() override;
 };
 

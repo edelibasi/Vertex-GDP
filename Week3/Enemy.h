@@ -8,8 +8,8 @@ class Enemy : public Character
 public:
 	Enemy(std::string Name, int Health, int Lives, int AttackPower, int Armor);
 
-	std::string ChooseAction() override;
-	void IncreaseStrength(int RoundNumber);
+	CharacterAction ChooseAction() override;
+	void IncreaseDifficulty(int RoundNumber);
 
 private:
 	std::mt19937 Generator;
