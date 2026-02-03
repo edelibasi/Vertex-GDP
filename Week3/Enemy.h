@@ -6,10 +6,10 @@
 class Enemy : public Character
 {
 public:
-	Enemy(std::string Name, int Health, int Lives, int AttackPower, int Armor);
+	Enemy(std::string Name, int Health, int Stamina, int Lives, int AttackPower, int Armor);
 
 	CharacterAction ChooseAction() override;
-	void IncreaseDifficulty(int RoundNumber);
+	void IncreaseDifficultyTo(int RoundNumber);
 
 private:
 	std::mt19937 Generator;

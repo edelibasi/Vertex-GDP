@@ -1,32 +1,18 @@
 #include "Enemy.h"
 #include <iostream>
 
-Enemy::Enemy(std::string Name, int Health, int Lives, int AttackPower, int Armor) 
-	: Character(Name, Health, Lives, AttackPower, Armor), Generator(std::random_device{}()), Distribution(0, 3)
+Enemy::Enemy(std::string Name, int Health, int Stamina, int Lives, int AttackPower, int Armor) 
+	: Character(Name, Health, Stamina, Lives, AttackPower, Armor), Generator(std::random_device{}()), Distribution(1, 4)
 {}
 
 CharacterAction Enemy::ChooseAction()
 {
-	switch (CharacterAction(Distribution(Generator)))
-	{
-	case Attack:
-		AttackPower += 5.0f;
-		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
-		break;
-
-	case Parry:
-		break;
-
-	case Defend:
-		break;
-
-	default:
-		throw std::runtime_error("Invalid action chosen by Enemy.");
-		break;
-	}
+	CharacterAction Action = CharacterAction(Distribution(Generator));
+	UpdateStamina(GetStaminaConsumption(Action));
+	return Action;
 }
 
-void Enemy::IncreaseDifficulty(int RoundNumber)
+void Enemy::IncreaseDifficultyTo(int RoundNumber)
 {
 	switch (RoundNumber)
 	{
@@ -34,28 +20,27 @@ void Enemy::IncreaseDifficulty(int RoundNumber)
 		return;
 
 	case 2:
-		Health += RoundNumber;
-		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
 		Name = "Goblin Warrior";
+		UpdateHealth(RoundNumber * 10);
+		
 		break;
 	case 3:
-		AttackPower += RoundNumber;
-		Health += RoundNumber;
-		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
 		Name = "Gladiator";
+		UpdateHealth(RoundNumber * 10);
+		UpdateAttackPower(RoundNumber * 10);
+		
 		break;
 	case 4:
-		AttackPower += RoundNumber;
-		Health += RoundNumber;
-		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
 		Name = "Berserker";
+		UpdateHealth(RoundNumber * 10);
+		UpdateAttackPower(RoundNumber * 10);
+		
 		break;
 	case 5:
-		AttackPower += RoundNumber;
-		Health += RoundNumber;
-		Armor += RoundNumber / 2;
-		std::cout << Name << " increases its Attack Power to " << AttackPower << "!" << std::endl;
 		Name = "Knight Champion";
+		UpdateHealth(RoundNumber * 10);
+		UpdateAttackPower(RoundNumber * 10);
+		UpdateArmor((RoundNumber * 10) / 2);
 		break;
 
 	default:
