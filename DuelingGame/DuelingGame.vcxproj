@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{39af61eb-0e5b-4a40-8214-795fa613f829}</ProjectGuid>
-    <RootNamespace>Week3</RootNamespace>
+    <RootNamespace>DuelingGame</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>DuelingGame</ProjectName>
   </PropertyGroup>
