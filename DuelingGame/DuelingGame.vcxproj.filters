@@ -1,0 +1,176 @@
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Classes">
+      <UniqueIdentifier>{8130bdb8-0de8-4986-b172-950fdb729440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Classes">
+      <UniqueIdentifier>{b74dd102-a7b3-405a-b2fd-3bcedbe3d5d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Helpers">
+      <UniqueIdentifier>{93e6dbc2-e517-4b58-a6eb-3d9c5df4289c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{7a8c4e92-f3d4-4c1a-b5e9-2d1f6a8c9e3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters">
+      <UniqueIdentifier>{ec10c24b-6915-406d-87f8-49474871dbfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters\Knight">
+      <UniqueIdentifier>{54998282-8d17-412a-a7f1-cc55c22113fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters\Goblin">
+      <UniqueIdentifier>{bc66ef7d-ca4e-46c3-a4ea-144fd48e64fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters\Goblin-Warrior">
+      <UniqueIdentifier>{3bc19c50-9a74-4233-a009-ea589acba1ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters\Goblin-Boss">
+      <UniqueIdentifier>{6c2b062a-b959-4f3f-ac7b-3d542479e1d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Characters\Goblin-Giant">
+      <UniqueIdentifier>{03610092-7902-4a95-b66a-aa248213b3b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source Files\Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layout+Constants.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Character.h">
+      <Filter>Header Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Header Files\Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="SourceArt\Arena.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-ATTACK.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-DEFEND.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-DIE.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-HURT.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-PARRY.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Knight\KNIGHT-REST.png">
+      <Filter>Resource Files\Characters\Knight</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-ATTACK.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-DEFEND.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-DIE.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-HURT.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-PARRY.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin\GOBLIN-REST.png">
+      <Filter>Resource Files\Characters\Goblin</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-ATTACK.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-DEFEND.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-DIE.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-HURT.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-PARRY.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Warrior\GOBLIN-WARRIOR-REST.png">
+      <Filter>Resource Files\Characters\Goblin-Warrior</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-ATTACK.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-DEFEND.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-DIE.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-HURT.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-PARRY.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Boss\GOBLIN-BOSS-REST.png">
+      <Filter>Resource Files\Characters\Goblin-Boss</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-ATTACK.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-DEFEND.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-DIE.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-HURT.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-PARRY.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+    <Image Include="SourceArt\Characters\Goblin-Giant\GOBLIN-GIANT-REST.png">
+      <Filter>Resource Files\Characters\Goblin-Giant</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
