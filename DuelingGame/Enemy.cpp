@@ -1,7 +1,7 @@
 #include "Enemy.h"
 #include <iostream>
 
-Enemy::Enemy(std::string Name, int Health, int Stamina, int Lives, int AttackPower, int Armor) 
+Enemy::Enemy(const std::string& Name, int Health, int Stamina, int Lives, int AttackPower, int Armor) 
 	: Character(Name, Health, Stamina, Lives, AttackPower, Armor), Generator(std::random_device{}()), Distribution(1, 4)
 {}
 
