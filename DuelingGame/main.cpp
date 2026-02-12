@@ -5,6 +5,9 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <iostream>
+#include <ostream>
+
 #include "GameMessage.h"
 #include "ImageStore.h"
 
@@ -42,9 +45,9 @@ struct CombatOutcome {
 	std::function<void(Player&, Enemy&)> ResolveEffects;
 };
 
-static void ProcessOutcome(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message, CharacterAction& OutPlayerAction, CharacterAction& OutEnemyAction);
+static void ProcessCharacterActions(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message);
 static CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, const Enemy& MainEnemy);
-static void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction);
+static void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message);
 static void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber);
 
 using ActionPair = std::pair<CharacterAction, CharacterAction>;
@@ -91,7 +94,7 @@ int main()
 		switch (CurrentState)
 		{
 		case GameState::Battle:
-			ProcessOutcome(MainPlayer, MainEnemy, CurrentMessage, LastPlayerAction, LastEnemyAction);
+			ProcessCharacterActions(MainPlayer, MainEnemy, CurrentMessage);
 
 			if (!MainEnemy.IsAlive())
 			{
@@ -159,7 +162,7 @@ int main()
 		ClearBackground(GameColors::BACKGROUND);
 		DrawTexture(background, 0, 0, WHITE);
 
-		RenderGameState(MainPlayer, MainEnemy, RoundNumber, CurrentMessage, LastPlayerAction, LastEnemyAction);
+		RenderGameState(MainPlayer, MainEnemy, RoundNumber, CurrentMessage);
 
 		if (CurrentState == GameState::Battle)
 		{
@@ -262,52 +265,38 @@ CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, con
 	case CombatOutcomeType::BothRest:
 		return {GameMessage("Both warriors rest!", "Respite in battle."),
 			[](Player&, Enemy&) {}};
-
-	default:
-		return {GameMessage("..."), [](Player&, Enemy&) {}};
 	}
+	
+	return {GameMessage("..."), [](Player&, Enemy&) {}};
 }
 
-void ProcessOutcome(
+void ProcessCharacterActions(
 	Player& MainPlayer,
 	Enemy& MainEnemy,
-	GameMessage& Message,
-	CharacterAction& OutPlayerAction,
-	CharacterAction& OutEnemyAction)
+	GameMessage& Message)
 {
 	CharacterAction PlayerAction = MainPlayer.ChooseAction();
 	if (PlayerAction == CharacterAction::None) return;
 	CharacterAction EnemyAction = MainEnemy.ChooseAction();
-
-	OutPlayerAction = PlayerAction;
-	OutEnemyAction = EnemyAction;
 
 	// Check stamina before consuming it
 	if (MainPlayer.GetStamina() < -Player::GetStaminaConsumption(PlayerAction))
 	{
 		Message = GameMessage(MainPlayer.GetName() + " is too exhausted and must rest!");
 		PlayerAction = CharacterAction::Rest;
-		OutPlayerAction = CharacterAction::Rest;
 	}
 
 	if (MainEnemy.GetStamina() < -Enemy::GetStaminaConsumption(EnemyAction))
 	{
 		Message = GameMessage(MainEnemy.GetName() + " is too exhausted and must rest!");
 		EnemyAction = CharacterAction::Rest;
-		OutEnemyAction = CharacterAction::Rest;
 	}
-
+	
 	// Apply stamina cost after validation
 	MainPlayer.UpdateStamina(Player::GetStaminaConsumption(PlayerAction));
 	MainEnemy.UpdateStamina(Enemy::GetStaminaConsumption(EnemyAction));
 
-	// Early return if either was forced to rest due to exhaustion
-	if (PlayerAction == CharacterAction::Rest && OutPlayerAction != PlayerAction)
-		return;
-	if (EnemyAction == CharacterAction::Rest && OutEnemyAction != EnemyAction)
-		return;
-
-	auto it = OutcomeTypeMap.find({PlayerAction, EnemyAction});
+	const auto it = OutcomeTypeMap.find({PlayerAction, EnemyAction});
 	if (it == OutcomeTypeMap.end()) return;
 
 	CombatOutcome Outcome = BuildOutcome(it->second, MainPlayer, MainEnemy);
@@ -319,9 +308,7 @@ void RenderGameState(
 	const Player& MainPlayer,
 	const Enemy& MainEnemy,
 	int RoundNumber,
-	const GameMessage& Message,
-	CharacterAction PlayerAction,
-	CharacterAction EnemyAction)
+	const GameMessage& Message)
 {
 	// Title & Round Info
 	DrawText(
