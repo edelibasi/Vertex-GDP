@@ -1,5 +1,4 @@
 #include "Player.h"
-#include "Logger.h"
 #include <raylib.h>
 
 Player::Player(const std::string& Name, int Health, int Stamina, int Lives, int AttackPower, int Armor)
@@ -28,7 +27,6 @@ void Player::SetDefaultBaseValues()
 
 void Player::LevelUp(int RoundNumber)
 {
-	Logger::LogMessage(LogLevel::INFO, Name + " has leveled up! Attack Power and Armor increased.");
 	UpdateHealth(RoundNumber * 10);
 	UpdateAttackPower(RoundNumber * 10);
 	UpdateArmor((RoundNumber * 10) / 2);

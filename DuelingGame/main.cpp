@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include <functional>
-
+#include "GameMessage.h"
 #include "ImageStore.h"
 
 enum class GameState: uint8_t
@@ -15,41 +15,6 @@ enum class GameState: uint8_t
 	PlayerDefeated,
 	GameWon,
 	GameOver
-};
-
-struct GameMessage
-{
-	enum class Type: std::uint8_t { Default, Success, Warning, Error };
-	
-	std::string Line1;
-	std::string Line2;
-	std::string Line3;
-	int FrameCount;
-	Type MessageType;
-	
-	GameMessage() : FrameCount(0), MessageType(Type::Default) {}
-	GameMessage(
-		std::string L1,
-		std::string L2 = "",
-		std::string L3 = "",
-		const Type MessageType = Type::Default
-	)
-		: Line1(std::move(L1)), Line2(std::move(L2)), Line3(std::move(L3)), FrameCount(GameConstants::MESSAGE_DISPLAY_TIME), MessageType(MessageType) { }
-
-	bool IsActive() const { return FrameCount > 0; }
-	void Update() { if (FrameCount > 0) --FrameCount; }
-
-	Color GetColor() const
-	{
-		switch (MessageType)
-		{
-		case Type::Success: return GameColors::SUCCESS;
-		case Type::Warning: return GameColors::WARNING;
-		case Type::Error: return GameColors::DAMAGE;
-		case Type::Default: return GameColors::TEXT;
-		}
-		return GameColors::TEXT;
-	}
 };
 
 struct CombatOutcome {
@@ -271,7 +236,14 @@ void ProcessOutcome(
 	Outcome.ResolveEffects(MainPlayer, MainEnemy);
 }
 
-void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction)
+void RenderGameState(
+	const Player& MainPlayer,
+	const Enemy& MainEnemy,
+	int RoundNumber,
+	const GameMessage& Message,
+	CharacterAction PlayerAction,
+	CharacterAction EnemyAction
+	)
 {
 	// Title & Round Info
 	DrawText(
@@ -293,11 +265,29 @@ void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int Round
 	if (Message.IsActive())
 	{
 		if (!Message.Line1.empty())
-			DrawText(Message.Line1.c_str(), UILayout_Constants::TEXT_X_CENTER, UILayout_Constants::MESSAGE_LINE1_Y, UILayout_Constants::TEXT_SIZE, Message.GetColor());
+			DrawText(
+				Message.Line1.c_str(),
+				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::MESSAGE_LINE1_Y,
+				UILayout_Constants::TEXT_SIZE,
+				Message.GetColor()
+				);
 		if (!Message.Line2.empty())
-			DrawText(Message.Line2.c_str(), UILayout_Constants::TEXT_X_CENTER, UILayout_Constants::MESSAGE_LINE2_Y, UILayout_Constants::TEXT_SIZE, Message.GetColor());
+			DrawText(
+				Message.Line2.c_str(),
+				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::MESSAGE_LINE2_Y,
+				UILayout_Constants::TEXT_SIZE,
+				Message.GetColor()
+				);
 		if (!Message.Line3.empty())
-			DrawText(Message.Line3.c_str(), UILayout_Constants::TEXT_X_CENTER, UILayout_Constants::MESSAGE_LINE3_Y, UILayout_Constants::TEXT_SIZE, Message.GetColor());
+			DrawText(
+				Message.Line3.c_str(),
+				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::MESSAGE_LINE3_Y,
+				UILayout_Constants::TEXT_SIZE,
+				Message.GetColor()
+				);
 	}
 }
 

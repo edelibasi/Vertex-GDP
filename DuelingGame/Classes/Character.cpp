@@ -1,6 +1,5 @@
 #include "Character.h"
 #include <algorithm>
-#include "Logger.h"
 
 const std::string GetActionName(CharacterAction Action)
 {
@@ -49,24 +48,20 @@ void Character::UpdateStamina(int InStamina)
 {
 	Stamina += InStamina;
 	Stamina = std::min(Stamina, 100);
-	Logger::LogMessage(LogLevel::INFO, Name + "'s Remaining Stamina: " + std::to_string(Stamina));
 }
 
 void Character::UpdateLives(int InLives)
 {
 	Lives += InLives;
 	Lives = std::max(Lives, 0);
-	Logger::LogMessage(LogLevel::INFO, Name + "'s Remaining Lives: " + std::to_string(Lives));
 }
 
 void Character::UpdateAttackPower(int InAttackPower)
 {
 	AttackPower += InAttackPower;
-	Logger::LogMessage(LogLevel::INFO, Name + "'s Attack Power: " + std::to_string(AttackPower));
 }
 
 void Character::UpdateArmor(int InArmor)
 {
 	Armor += InArmor;
-	Logger::LogMessage(LogLevel::INFO, Name + "'s Armor: " + std::to_string(Armor));
 }
