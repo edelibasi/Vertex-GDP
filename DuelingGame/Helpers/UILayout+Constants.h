@@ -17,12 +17,11 @@ struct GameConstants
 	static constexpr int MESSAGE_DISPLAY_TIME = 180; // frames at 60 FPS = 2 seconds
 };
 
-// Layout constants organized in struct
 struct UILayout_Constants
 {
 	// View Sizes
 	static constexpr int SCREEN_WIDTH = 800;
-	static constexpr int SCREEN_HEIGHT = 600;
+	static constexpr int SCREEN_HEIGHT = 760;
 	
 	// Background
 	static constexpr int BACKGROUND_WIDTH = SCREEN_WIDTH;
@@ -32,7 +31,6 @@ struct UILayout_Constants
 	static constexpr int TEXT_SIZE = 20;
 	static constexpr int TEXT_SIZE_SMALL = TEXT_SIZE - 2;
 	static constexpr int TEXT_X = 20;
-	static constexpr int TEXT_X_CENTER = 190;
 
 	// Title & Round
 	static constexpr int TITLE_Y = 420;
@@ -40,15 +38,9 @@ struct UILayout_Constants
 	static constexpr int ACTION_MENU_Y = ROUND_Y + 30;
 
 	// Messages
-	static constexpr int MESSAGE_Y_START = 500;
+	static constexpr int MESSAGE_Y_START = 520;
 	static constexpr int MESSAGE_Y_SPACING = 20;
 	static constexpr int MESSAGE_LINE1_Y = MESSAGE_Y_START;
 	static constexpr int MESSAGE_LINE2_Y = MESSAGE_Y_START + MESSAGE_Y_SPACING;
 	static constexpr int MESSAGE_LINE3_Y = MESSAGE_Y_START + (MESSAGE_Y_SPACING * 2);
-
-	// Character Stats
-	static constexpr int STAT_X = 50;
-	static constexpr int STAT_X_ENEMY = STAT_X + 400;
-	static constexpr int STAT_Y_START = 320;
-	static constexpr int STAT_Y_SPACING = 25;
 };

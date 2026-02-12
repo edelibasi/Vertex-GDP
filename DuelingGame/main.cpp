@@ -5,9 +5,7 @@
 #include <string>
 #include <map>
 #include <functional>
-#include <iostream>
 #include <ostream>
-
 #include "GameMessage.h"
 #include "ImageStore.h"
 
@@ -44,6 +42,9 @@ struct CombatOutcome {
 	GameMessage Message;
 	std::function<void(Player&, Enemy&)> ResolveEffects;
 };
+
+float TIME_SINCE_LAST_INPUT = 0.0f;
+float InputCooldown = 3.5f;
 
 static void ProcessCharacterActions(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message);
 static CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, const Enemy& MainEnemy);
@@ -84,12 +85,13 @@ int main()
 	CharacterAction LastPlayerAction = CharacterAction::None;
 	CharacterAction LastEnemyAction = CharacterAction::None;
 	Texture2D background = LoadTexture(ImageStore::Background.c_str());
-
+	
 	if (background.id == 0)
 		TraceLog(LOG_WARNING, "Failed to load background texture: %s", ImageStore::Background.c_str());
 
 	while (!WindowShouldClose())
 	{
+		TIME_SINCE_LAST_INPUT += GetFrameTime();
 		// Update game state
 		switch (CurrentState)
 		{
@@ -275,9 +277,11 @@ void ProcessCharacterActions(
 	Enemy& MainEnemy,
 	GameMessage& Message)
 {
+	if (TIME_SINCE_LAST_INPUT < InputCooldown) return; // Debounce: ignore input until cooldown has elapsed
 	CharacterAction PlayerAction = MainPlayer.ChooseAction();
 	if (PlayerAction == CharacterAction::None) return;
 	CharacterAction EnemyAction = MainEnemy.ChooseAction();
+	TIME_SINCE_LAST_INPUT = 0.0f; // Reset input timer on valid action
 
 	// Check stamina before consuming it
 	if (MainPlayer.GetStamina() < -Player::GetStaminaConsumption(PlayerAction))
@@ -332,7 +336,7 @@ void RenderGameState(
 		if (!Message.Line1.empty())
 			DrawText(
 				Message.Line1.c_str(),
-				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::TEXT_X,
 				UILayout_Constants::MESSAGE_LINE1_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
@@ -340,7 +344,7 @@ void RenderGameState(
 		if (!Message.Line2.empty())
 			DrawText(
 				Message.Line2.c_str(),
-				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::TEXT_X,
 				UILayout_Constants::MESSAGE_LINE2_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
@@ -348,7 +352,7 @@ void RenderGameState(
 		if (!Message.Line3.empty())
 			DrawText(
 				Message.Line3.c_str(),
-				UILayout_Constants::TEXT_X_CENTER,
+				UILayout_Constants::TEXT_X,
 				UILayout_Constants::MESSAGE_LINE3_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
