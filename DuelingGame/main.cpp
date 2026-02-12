@@ -17,14 +17,56 @@ enum class GameState: uint8_t
 	GameOver
 };
 
+enum class CombatOutcomeType : uint8_t
+{
+	Clash,
+	ParriedByEnemy,
+	BlockedByEnemy,
+	HitEnemy,
+	ParriedByPlayer,
+	Deadlock,
+	StandoffParryDefend,
+	ParryRest,
+	BlockedByPlayer,
+	DefendParry,
+	BothDefend,
+	DefendRest,
+	HitPlayer,
+	RestParry,
+	RestDefend,
+	BothRest
+};
+
 struct CombatOutcome {
 	GameMessage Message;
 	std::function<void(Player&, Enemy&)> ResolveEffects;
 };
 
 static void ProcessOutcome(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message, CharacterAction& OutPlayerAction, CharacterAction& OutEnemyAction);
+static CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, const Enemy& MainEnemy);
 static void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction);
 static void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber);
+
+using ActionPair = std::pair<CharacterAction, CharacterAction>;
+static const std::map<ActionPair, CombatOutcomeType> OutcomeTypeMap =
+{
+	{{CharacterAction::Attack, CharacterAction::Attack},  CombatOutcomeType::Clash},
+	{{CharacterAction::Attack, CharacterAction::Parry},   CombatOutcomeType::ParriedByEnemy},
+	{{CharacterAction::Attack, CharacterAction::Defend},  CombatOutcomeType::BlockedByEnemy},
+	{{CharacterAction::Attack, CharacterAction::Rest},    CombatOutcomeType::HitEnemy},
+	{{CharacterAction::Parry,  CharacterAction::Attack},  CombatOutcomeType::ParriedByPlayer},
+	{{CharacterAction::Parry,  CharacterAction::Parry},   CombatOutcomeType::Deadlock},
+	{{CharacterAction::Parry,  CharacterAction::Defend},  CombatOutcomeType::StandoffParryDefend},
+	{{CharacterAction::Parry,  CharacterAction::Rest},    CombatOutcomeType::ParryRest},
+	{{CharacterAction::Defend, CharacterAction::Attack},  CombatOutcomeType::BlockedByPlayer},
+	{{CharacterAction::Defend, CharacterAction::Parry},   CombatOutcomeType::DefendParry},
+	{{CharacterAction::Defend, CharacterAction::Defend},  CombatOutcomeType::BothDefend},
+	{{CharacterAction::Defend, CharacterAction::Rest},    CombatOutcomeType::DefendRest},
+	{{CharacterAction::Rest,   CharacterAction::Attack},  CombatOutcomeType::HitPlayer},
+	{{CharacterAction::Rest,   CharacterAction::Parry},   CombatOutcomeType::RestParry},
+	{{CharacterAction::Rest,   CharacterAction::Defend},  CombatOutcomeType::RestDefend},
+	{{CharacterAction::Rest,   CharacterAction::Rest},    CombatOutcomeType::BothRest}
+};
 
 int main()
 {
@@ -40,11 +82,15 @@ int main()
 	CharacterAction LastEnemyAction = CharacterAction::None;
 	Texture2D background = LoadTexture(ImageStore::Background.c_str());
 
+	if (background.id == 0)
+		TraceLog(LOG_WARNING, "Failed to load background texture: %s", ImageStore::Background.c_str());
+
 	while (!WindowShouldClose())
 	{
 		// Update game state
-		if (CurrentState == GameState::Battle)
+		switch (CurrentState)
 		{
+		case GameState::Battle:
 			ProcessOutcome(MainPlayer, MainEnemy, CurrentMessage, LastPlayerAction, LastEnemyAction);
 
 			if (!MainEnemy.IsAlive())
@@ -58,9 +104,9 @@ int main()
 			{
 				CurrentState = GameState::PlayerDefeated;
 			}
-		}
-		else if (CurrentState == GameState::EnemyDefeated)
-		{
+			break;
+
+		case GameState::EnemyDefeated:
 			if (!CurrentMessage.IsActive())
 			{
 				RoundNumber++;
@@ -78,9 +124,9 @@ int main()
 					CurrentState = GameState::Battle;
 				}
 			}
-		}
-		else if (CurrentState == GameState::PlayerDefeated)
-		{
+			break;
+
+		case GameState::PlayerDefeated:
 			if (MainPlayer.GetLives() > 1)
 			{
 				MainPlayer.UpdateLives(-1);
@@ -99,6 +145,11 @@ int main()
 					MainEnemy.GetName() + " is the ultimate victor!"
 				);
 			}
+			break;
+
+		case GameState::GameWon:
+		case GameState::GameOver:
+			break;
 		}
 
 		CurrentMessage.Update();
@@ -107,21 +158,33 @@ int main()
 		BeginDrawing();
 		ClearBackground(GameColors::BACKGROUND);
 		DrawTexture(background, 0, 0, WHITE);
-		
+
 		RenderGameState(MainPlayer, MainEnemy, RoundNumber, CurrentMessage, LastPlayerAction, LastEnemyAction);
+
 		if (CurrentState == GameState::Battle)
 		{
 			DrawText(
 				"1.Attack  2.Parry  3.Defend  4.Rest",
 				UILayout_Constants::TEXT_X,
-				UILayout_Constants::ROUND_Y + 30,
+				UILayout_Constants::ACTION_MENU_Y,
 				UILayout_Constants::TEXT_SIZE, GameColors::SUCCESS
-				);
+			);
 		}
+		else if ((CurrentState == GameState::GameWon || CurrentState == GameState::GameOver) && !CurrentMessage.IsActive())
+		{
+			DrawText(
+				"Press any key to exit...",
+				UILayout_Constants::TEXT_X,
+				UILayout_Constants::ACTION_MENU_Y,
+				UILayout_Constants::TEXT_SIZE, GameColors::TEXT
+			);
+		}
+
 		EndDrawing();
 
-		// Exit conditions
-		if ((CurrentState == GameState::GameWon || CurrentState == GameState::GameOver) && !CurrentMessage.IsActive())
+		// Exit on key press after end-game message finishes
+		if ((CurrentState == GameState::GameWon || CurrentState == GameState::GameOver)
+			&& !CurrentMessage.IsActive() && GetKeyPressed() != 0)
 		{
 			break;
 		}
@@ -130,6 +193,79 @@ int main()
 	UnloadTexture(background);
 	CloseWindow();
 	return 0;
+}
+
+CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, const Enemy& MainEnemy)
+{
+	switch (Type)
+	{
+	case CombatOutcomeType::Clash:
+		return {GameMessage("Clash!", "Both warriors exchange blows!"),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::ParriedByEnemy:
+		return {GameMessage(MainEnemy.GetName() + " parries the attack!", "", "", GameMessage::Type::Error),
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }};
+
+	case CombatOutcomeType::BlockedByEnemy:
+		return {GameMessage(MainEnemy.GetName() + " blocks the attack!", "Reduced damage!", "", GameMessage::Type::Warning),
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-((P.GetAttackPower() - E.GetArmor()) / 2)); }};
+
+	case CombatOutcomeType::HitEnemy:
+		return {GameMessage(MainEnemy.GetName() + " is caught off guard!", "Direct hit!", "", GameMessage::Type::Success),
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }};
+
+	case CombatOutcomeType::ParriedByPlayer:
+		return {GameMessage(MainPlayer.GetName() + " parries!", "", "", GameMessage::Type::Success),
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }};
+
+	case CombatOutcomeType::Deadlock:
+		return {GameMessage("Deadlock!", "Neither lands a blow."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::StandoffParryDefend:
+		return {GameMessage("Tense standoff.", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::ParryRest:
+		return {GameMessage(MainEnemy.GetName() + " gathers strength while " + MainPlayer.GetName() + " tries to thwart an attack!", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::BlockedByPlayer:
+		return {GameMessage(MainPlayer.GetName() + " braces for impact!", "Reduced damage!", "", GameMessage::Type::Warning),
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-((E.GetAttackPower() - P.GetArmor()) / 2)); }};
+
+	case CombatOutcomeType::DefendParry:
+		return {GameMessage("Mutual defense.", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::BothDefend:
+		return {GameMessage("Both prepare defenses.", "A stalemate ensues."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::DefendRest:
+		return {GameMessage(MainPlayer.GetName() + " prepares to defend while " + MainEnemy.GetName() + " is resting!", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::HitPlayer:
+		return {GameMessage(MainPlayer.GetName() + " is caught resting!", "Direct hit!", "", GameMessage::Type::Error),
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }};
+
+	case CombatOutcomeType::RestParry:
+		return {GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " tries to thwart an attack!", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::RestDefend:
+		return {GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " prepares to defend!", "Nothing happens."),
+			[](Player&, Enemy&) {}};
+
+	case CombatOutcomeType::BothRest:
+		return {GameMessage("Both warriors rest!", "Respite in battle."),
+			[](Player&, Enemy&) {}};
+
+	default:
+		return {GameMessage("..."), [](Player&, Enemy&) {}};
+	}
 }
 
 void ProcessOutcome(
@@ -142,96 +278,39 @@ void ProcessOutcome(
 	CharacterAction PlayerAction = MainPlayer.ChooseAction();
 	if (PlayerAction == CharacterAction::None) return;
 	CharacterAction EnemyAction = MainEnemy.ChooseAction();
-	
+
 	OutPlayerAction = PlayerAction;
 	OutEnemyAction = EnemyAction;
 
-	// Check stamina before performing actions
+	// Check stamina before consuming it
 	if (MainPlayer.GetStamina() < -Player::GetStaminaConsumption(PlayerAction))
 	{
 		Message = GameMessage(MainPlayer.GetName() + " is too exhausted and must rest!");
-		MainPlayer.UpdateStamina(Player::GetStaminaConsumption(CharacterAction::Rest));
+		PlayerAction = CharacterAction::Rest;
 		OutPlayerAction = CharacterAction::Rest;
-		return;
 	}
 
 	if (MainEnemy.GetStamina() < -Enemy::GetStaminaConsumption(EnemyAction))
 	{
 		Message = GameMessage(MainEnemy.GetName() + " is too exhausted and must rest!");
-		MainEnemy.UpdateStamina(Enemy::GetStaminaConsumption(CharacterAction::Rest));
+		EnemyAction = CharacterAction::Rest;
 		OutEnemyAction = CharacterAction::Rest;
-		return;
 	}
-	
-	using ActionPair = std::pair<CharacterAction, CharacterAction>;
-	std::map<ActionPair, CombatOutcome> OutcomeMap = 
-	{
-		{{CharacterAction::Attack, CharacterAction::Attack},
-		{GameMessage("Clash!", "Both warriors exchange blows!"),
-		[](Player& Player, Enemy& Enemy) {}}},
 
-		{{CharacterAction::Attack, CharacterAction::Parry},
-		{GameMessage(MainEnemy.GetName() + " parries the attack!", "", "", GameMessage::Type::Error),
-		[](Player& Player, const Enemy& Enemy) { Player.UpdateHealth(-(Player.GetAttackPower() - Enemy.GetArmor())); }}},
+	// Apply stamina cost after validation
+	MainPlayer.UpdateStamina(Player::GetStaminaConsumption(PlayerAction));
+	MainEnemy.UpdateStamina(Enemy::GetStaminaConsumption(EnemyAction));
 
-		{{CharacterAction::Attack, CharacterAction::Defend},
-		{GameMessage(MainEnemy.GetName() + " blocks the attack!", "Reduced damage!", "", GameMessage::Type::Warning),
-		[](const Player& Player, Enemy& Enemy) { Enemy.UpdateHealth(-((Player.GetAttackPower() - Enemy.GetArmor()) / 2)); }}},
+	// Early return if either was forced to rest due to exhaustion
+	if (PlayerAction == CharacterAction::Rest && OutPlayerAction != PlayerAction)
+		return;
+	if (EnemyAction == CharacterAction::Rest && OutEnemyAction != EnemyAction)
+		return;
 
-		{{CharacterAction::Attack, CharacterAction::Rest},
-		{GameMessage(MainEnemy.GetName() + " is caught off guard!", "Direct hit!", "", GameMessage::Type::Success),
-		[](const Player& Player, Enemy& Enemy) { Enemy.UpdateHealth(-(Player.GetAttackPower() - Enemy.GetArmor())); }}},
+	auto it = OutcomeTypeMap.find({PlayerAction, EnemyAction});
+	if (it == OutcomeTypeMap.end()) return;
 
-		{{CharacterAction::Parry, CharacterAction::Attack},
-		{GameMessage(MainPlayer.GetName() + " parries!", "", "", GameMessage::Type::Success),
-		[](const Player& Player, Enemy& Enemy) { Enemy.UpdateHealth(-(Enemy.GetAttackPower() - Player.GetArmor())); }}},
-
-		{{CharacterAction::Parry, CharacterAction::Parry},
-		{GameMessage("Deadlock!", "Neither lands a blow."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Parry, CharacterAction::Defend},
-		{GameMessage("Tense standoff.", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Parry, CharacterAction::Rest},
-		{GameMessage(MainEnemy.GetName() + " gathers strength while " + MainPlayer.GetName() + " tries to thwart an attack!", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Defend, CharacterAction::Attack},
-		{GameMessage(MainPlayer.GetName() + " braces for impact!", "Reduced damage!", "", GameMessage::Type::Warning),
-		[](Player& Player, const Enemy& Enemy) { Player.UpdateHealth(-((Enemy.GetAttackPower() - Player.GetArmor()) / 2)); }}},
-
-		{{CharacterAction::Defend, CharacterAction::Parry},
-		{GameMessage("Mutual defense.", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Defend, CharacterAction::Defend},
-		{GameMessage("Both prepare defenses.", "A stalemate ensues."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Defend, CharacterAction::Rest},
-		{GameMessage(MainPlayer.GetName() + " prepares to defend while " + MainEnemy.GetName() + " is resting!", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Rest, CharacterAction::Attack},
-		{GameMessage(MainPlayer.GetName() + " is caught resting!", "Direct hit!", "", GameMessage::Type::Error),
-		[](Player& Player, const Enemy& Enemy) { Player.UpdateHealth(-(Enemy.GetAttackPower() - Player.GetArmor())); }}},
-
-		{{CharacterAction::Rest, CharacterAction::Parry},
-		{GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " tries to thwart an attack!", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Rest, CharacterAction::Defend},
-		{GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " prepares to defend!", "Nothing happens."),
-		[](Player& Player, Enemy& Enemy) {}}},
-
-		{{CharacterAction::Rest, CharacterAction::Rest},
-		{GameMessage("Both warriors rest!", "Respite in battle."),
-		[](Player& Player, Enemy& Enemy) {}}}
-	};
-
-	CombatOutcome Outcome = OutcomeMap[{ OutPlayerAction, OutEnemyAction }];
+	CombatOutcome Outcome = BuildOutcome(it->second, MainPlayer, MainEnemy);
 	Message = Outcome.Message;
 	Outcome.ResolveEffects(MainPlayer, MainEnemy);
 }
@@ -242,25 +321,24 @@ void RenderGameState(
 	int RoundNumber,
 	const GameMessage& Message,
 	CharacterAction PlayerAction,
-	CharacterAction EnemyAction
-	)
+	CharacterAction EnemyAction)
 {
 	// Title & Round Info
 	DrawText(
 		("Battle: " + MainPlayer.GetName() + " vs " + MainEnemy.GetName()).c_str(),
-		UILayout_Constants::TEXT_X, 
+		UILayout_Constants::TEXT_X,
 		UILayout_Constants::TITLE_Y,
 		UILayout_Constants::TEXT_SIZE,
 		GameColors::TEXT
-		);
+	);
 	DrawText(
 		("Round: " + std::to_string(RoundNumber)).c_str(),
 		UILayout_Constants::TEXT_X,
 		UILayout_Constants::ROUND_Y,
 		UILayout_Constants::TEXT_SIZE,
 		GameColors::TEXT
-		);
-	
+	);
+
 	// Messages
 	if (Message.IsActive())
 	{
@@ -271,7 +349,7 @@ void RenderGameState(
 				UILayout_Constants::MESSAGE_LINE1_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
-				);
+			);
 		if (!Message.Line2.empty())
 			DrawText(
 				Message.Line2.c_str(),
@@ -279,7 +357,7 @@ void RenderGameState(
 				UILayout_Constants::MESSAGE_LINE2_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
-				);
+			);
 		if (!Message.Line3.empty())
 			DrawText(
 				Message.Line3.c_str(),
@@ -287,7 +365,7 @@ void RenderGameState(
 				UILayout_Constants::MESSAGE_LINE3_Y,
 				UILayout_Constants::TEXT_SIZE,
 				Message.GetColor()
-				);
+			);
 	}
 }
 

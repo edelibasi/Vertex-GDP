@@ -7,7 +7,6 @@ Enemy::Enemy(const std::string& Name, int Health, int Stamina, int Lives, int At
 CharacterAction Enemy::ChooseAction()
 {
 	CharacterAction Action = CharacterAction(Distribution(Generator));
-	UpdateStamina(GetStaminaConsumption(Action));
 	return Action;
 }
 

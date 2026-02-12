@@ -14,9 +14,6 @@ CharacterAction Player::ChooseAction()
 	else if (IsKeyPressed(KEY_THREE)) Action = CharacterAction::Defend;
 	else if (IsKeyPressed(KEY_FOUR))  Action = CharacterAction::Rest;
 
-	if (Action != CharacterAction::None)
-		UpdateStamina(GetStaminaConsumption(Action));
-
 	return Action;
 }
 

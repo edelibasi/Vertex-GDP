@@ -37,6 +37,7 @@ struct UILayout_Constants
 	// Title & Round
 	static constexpr int TITLE_Y = 420;
 	static constexpr int ROUND_Y = 450;
+	static constexpr int ACTION_MENU_Y = ROUND_Y + 30;
 
 	// Messages
 	static constexpr int MESSAGE_Y_START = 500;
