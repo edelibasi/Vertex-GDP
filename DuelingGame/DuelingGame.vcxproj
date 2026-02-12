@@ -518,6 +518,7 @@
     <ClInclude Include="Classes\Character.h" />
     <ClInclude Include="Classes\Enemy.h" />
     <ClInclude Include="Classes\Player.h" />
+    <ClInclude Include="Helpers\ImageStore.h" />
     <ClInclude Include="Helpers\Logger.h" />
   </ItemGroup>
   <ItemGroup>

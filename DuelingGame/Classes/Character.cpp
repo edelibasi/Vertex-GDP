@@ -2,9 +2,42 @@
 #include <algorithm>
 #include "Logger.h"
 
+const std::string GetActionName(CharacterAction Action)
+{
+	switch (Action) {
+	case CharacterAction::None: return "None";
+	case CharacterAction::Attack: return "Attack";
+	case CharacterAction::Parry: return "Parry";
+	case CharacterAction::Defend: return "Defend";
+	case CharacterAction::Rest: return "Rest";
+	default: return "Unknown Action";
+	}
+}
+
 Character::Character(std::string Name, int Health, int Stamina, int Lives, int AttackPower, int Armor)
 	: Name(std::move(Name)), Health(Health), Stamina(Stamina), Lives(Lives), AttackPower(AttackPower), Armor(Armor)
 {}
+
+int Character::GetStaminaConsumption(CharacterAction Action)
+{
+	switch (Action) {
+	case CharacterAction::None: return 0;
+	case CharacterAction::Attack: return -10;
+	case CharacterAction::Parry: return -20;
+	case CharacterAction::Defend: return -5;
+	case CharacterAction::Rest: return 20; // Resting restores stamina
+	default: return 0;
+	}
+}
+
+void Character::SetBaseValues(int InHealth, int InStamina, int InLives, int InAttackPower, int InArmor)
+{
+	Health = InHealth;
+	Stamina = InStamina;
+	Lives = InLives;
+	AttackPower = InAttackPower;
+	Armor = InArmor;
+}
 
 void Character::UpdateHealth(int InHealth)
 {
@@ -22,6 +55,7 @@ void Character::UpdateStamina(int InStamina)
 void Character::UpdateLives(int InLives)
 {
 	Lives += InLives;
+	Lives = std::max(Lives, 0);
 	Logger::LogMessage(LogLevel::INFO, Name + "'s Remaining Lives: " + std::to_string(Lives));
 }
 
@@ -35,25 +69,4 @@ void Character::UpdateArmor(int InArmor)
 {
 	Armor += InArmor;
 	Logger::LogMessage(LogLevel::INFO, Name + "'s Armor: " + std::to_string(Armor));
-}
-
-int Character::GetStaminaConsumption(CharacterAction Action)
-{
-	switch (Action) {
-		case CharacterAction::None: return 0;
-		case CharacterAction::Attack: return -10;
-		case CharacterAction::Parry: return -20;
-		case CharacterAction::Defend: return -5;
-		case CharacterAction::Rest: return 20; // Resting restores stamina
-		default: return 0;
-	}
-}
-
-void Character::SetBaseValues(int InHealth, int InStamina, int InLives, int InAttackPower, int InArmor)
-{
-	Health = InHealth;
-	Stamina = InStamina;
-	Lives = InLives;
-	AttackPower = InAttackPower;
-	Armor = InArmor;
 }

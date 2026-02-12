@@ -2,13 +2,13 @@
 #include "Character.h"
 #include <random>
 
-
 class Enemy : public Character
 {
 public:
 	Enemy(const std::string& Name, int Health, int Stamina, int Lives, int AttackPower, int Armor);
 
 	CharacterAction ChooseAction() override;
+	void SetDefaultBaseValues();
 	void IncreaseDifficultyTo(int RoundNumber);
 
 private:

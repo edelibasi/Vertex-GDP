@@ -34,5 +34,5 @@ void Logger::PrintLog(const LogEntry& Entry)
 			break;
 	}
 
-	std::cout << Color << Entry.Message << "\033[0m" << std::endl;
+	std::cout << Color << Entry.Message << "\033[0m" << '\n';
 }

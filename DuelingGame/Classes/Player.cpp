@@ -21,6 +21,11 @@ CharacterAction Player::ChooseAction()
 	return Action;
 }
 
+void Player::SetDefaultBaseValues()
+{
+	SetBaseValues(100, 100, GetLives(), 20, 10);
+}
+
 void Player::LevelUp(int RoundNumber)
 {
 	Logger::LogMessage(LogLevel::INFO, Name + " has leveled up! Attack Power and Armor increased.");

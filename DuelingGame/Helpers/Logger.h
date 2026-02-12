@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-enum class LogLevel
+enum class LogLevel: uint8_t
 {
 	INFO,
 	WARNING,
@@ -12,8 +12,8 @@ enum class LogLevel
 
 struct LogEntry
 {
-	LogLevel Level;
 	std::string Message;
+	LogLevel Level;
 };
 
 class Logger
@@ -23,4 +23,3 @@ public:
 	static void LogMessage(LogLevel Level, const std::string& Message);
 	static void PrintLog(const LogEntry& Entry);
 };
-

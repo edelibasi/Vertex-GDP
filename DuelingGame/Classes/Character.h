@@ -1,26 +1,17 @@
 #pragma once
 #include <string>
 
-enum class CharacterAction : int
+enum class CharacterAction : uint8_t
 {
 	None, Attack, Parry, Defend, Rest
 };
 
-static const std::string GetActionName(CharacterAction Action)
-{
-	switch (Action) {
-		case CharacterAction::None: return "None";
-		case CharacterAction::Attack: return "Attack";
-		case CharacterAction::Parry: return "Parry";
-		case CharacterAction::Defend: return "Defend";
-		case CharacterAction::Rest: return "Rest";
-		default: return "Unknown Action";
-	}
-}
+static const std::string GetActionName(CharacterAction Action);
 
 class Character
 {
 public:
+	virtual ~Character() = default;
 	Character(std::string Name, int Health, int Stamina, int Lives, int AttackPower, int Armor);
 
 	const std::string& GetName() const { return Name; }

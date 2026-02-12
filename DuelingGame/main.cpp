@@ -6,7 +6,9 @@
 #include <map>
 #include <functional>
 
-enum class GameState
+#include "ImageStore.h"
+
+enum class GameState: uint8_t
 {
 	Battle,
 	EnemyDefeated,
@@ -18,21 +20,21 @@ enum class GameState
 struct GameMessage
 {
 	enum class Type: std::uint8_t { Default, Success, Warning, Error };
-
-	Type MessageType;
+	
 	std::string Line1;
 	std::string Line2;
 	std::string Line3;
 	int FrameCount;
+	Type MessageType;
 	
-	GameMessage() : MessageType(Type::Default), FrameCount(0) {}
+	GameMessage() : FrameCount(0), MessageType(Type::Default) {}
 	GameMessage(
 		std::string L1,
 		std::string L2 = "",
 		std::string L3 = "",
 		const Type MessageType = Type::Default
 	)
-		: MessageType(MessageType), Line1(std::move(L1)), Line2(std::move(L2)), Line3(std::move(L3)), FrameCount(GameConstants::MESSAGE_DISPLAY_TIME) { }
+		: Line1(std::move(L1)), Line2(std::move(L2)), Line3(std::move(L3)), FrameCount(GameConstants::MESSAGE_DISPLAY_TIME), MessageType(MessageType) { }
 
 	bool IsActive() const { return FrameCount > 0; }
 	void Update() { if (FrameCount > 0) --FrameCount; }
@@ -45,8 +47,8 @@ struct GameMessage
 		case Type::Warning: return GameColors::WARNING;
 		case Type::Error: return GameColors::DAMAGE;
 		case Type::Default: return GameColors::TEXT;
-		default: return GameColors::TEXT;
 		}
+		return GameColors::TEXT;
 	}
 };
 
@@ -56,8 +58,8 @@ struct CombatOutcome {
 };
 
 static void ProcessOutcome(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message, CharacterAction& OutPlayerAction, CharacterAction& OutEnemyAction);
-void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction);
-void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber);
+static void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction);
+static void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber);
 
 int main()
 {
@@ -71,6 +73,7 @@ int main()
 	GameMessage CurrentMessage = GameMessage();
 	CharacterAction LastPlayerAction = CharacterAction::None;
 	CharacterAction LastEnemyAction = CharacterAction::None;
+	Texture2D background = LoadTexture(ImageStore::Background.c_str());
 
 	while (!WindowShouldClose())
 	{
@@ -116,7 +119,7 @@ int main()
 			if (MainPlayer.GetLives() > 1)
 			{
 				MainPlayer.UpdateLives(-1);
-				MainPlayer.SetBaseValues(100, 100, MainPlayer.GetLives(), 20, 10);
+				MainPlayer.SetDefaultBaseValues();
 				CurrentMessage = GameMessage(
 					MainPlayer.GetName() + " has lost a life!",
 					MainPlayer.GetName() + " respawns to continue the battle!"
@@ -138,6 +141,8 @@ int main()
 		// Render
 		BeginDrawing();
 		ClearBackground(GameColors::BACKGROUND);
+		DrawTexture(background, 0, 0, WHITE);
+		
 		RenderGameState(MainPlayer, MainEnemy, RoundNumber, CurrentMessage, LastPlayerAction, LastEnemyAction);
 		if (CurrentState == GameState::Battle)
 		{
@@ -157,6 +162,7 @@ int main()
 		}
 	}
 
+	UnloadTexture(background);
 	CloseWindow();
 	return 0;
 }
@@ -297,8 +303,8 @@ void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int Round
 
 void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber)
 {
-	MainPlayer.SetBaseValues(100, 100, MainPlayer.GetLives(), 20, 10);
-	MainEnemy.SetBaseValues(80, 100, 1, 15, 0);
+	MainPlayer.SetDefaultBaseValues();
+	MainEnemy.SetDefaultBaseValues();
 	MainPlayer.LevelUp(RoundNumber);
 	MainEnemy.IncreaseDifficultyTo(RoundNumber);
 }

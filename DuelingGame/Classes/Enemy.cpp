@@ -11,6 +11,11 @@ CharacterAction Enemy::ChooseAction()
 	return Action;
 }
 
+void Enemy::SetDefaultBaseValues()
+{
+	SetBaseValues(80, 100, 1, 15, 0);
+}
+
 void Enemy::IncreaseDifficultyTo(int RoundNumber)
 {
 	switch (RoundNumber)
