@@ -7,6 +7,7 @@
 #include <functional>
 #include "GameMessage.h"
 #include "ImageStore.h"
+#include "SpriteAnimation.h"
 
 enum class GameState: uint8_t
 {
@@ -19,6 +20,7 @@ enum class GameState: uint8_t
 
 enum class CombatOutcomeType : uint8_t
 {
+	None,
 	Clash,
 	ParriedByEnemy,
 	BlockedByEnemy,
@@ -40,12 +42,15 @@ enum class CombatOutcomeType : uint8_t
 struct CombatOutcome {
 	GameMessage Message;
 	std::function<void(Player&, Enemy&)> ResolveEffects;
+	CombatOutcomeType Type = CombatOutcomeType::None;
 };
 
-static void ProcessOutcome(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message, CharacterAction& OutPlayerAction, CharacterAction& OutEnemyAction);
+static void ProcessOutcome(Player& MainPlayer, Enemy& MainEnemy, GameMessage& Message, CharacterAction& OutPlayerAction, CharacterAction& OutEnemyAction, CombatOutcomeType& OutOutcomeType);
 static CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, const Enemy& MainEnemy);
 static void RenderGameState(const Player& MainPlayer, const Enemy& MainEnemy, int RoundNumber, const GameMessage& Message, CharacterAction PlayerAction, CharacterAction EnemyAction);
 static void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber);
+static void LoadEnemySprites(CharacterSprites& EnemySprites, int RoundNumber);
+static void SetSpriteStatesForOutcome(CombatOutcomeType Type, CharacterSprites& PlayerSprites, CharacterSprites& EnemySprites, bool PlayerDead, bool EnemyDead);
 
 using ActionPair = std::pair<CharacterAction, CharacterAction>;
 static const std::map<ActionPair, CombatOutcomeType> OutcomeTypeMap =
@@ -80,10 +85,18 @@ int main()
 	GameMessage CurrentMessage = GameMessage();
 	CharacterAction LastPlayerAction = CharacterAction::None;
 	CharacterAction LastEnemyAction = CharacterAction::None;
+	CombatOutcomeType LastOutcomeType = CombatOutcomeType::None;
 	Texture2D background = LoadTexture(ImageStore::Background.c_str());
 
 	if (background.id == 0)
 		TraceLog(LOG_WARNING, "Failed to load background texture: %s", ImageStore::Background.c_str());
+
+	// Load character sprites
+	CharacterSprites PlayerSprites;
+	PlayerSprites.LoadFromConfig(ImageStore::KnightSprites);
+
+	CharacterSprites EnemySprites;
+	LoadEnemySprites(EnemySprites, RoundNumber);
 
 	while (!WindowShouldClose())
 	{
@@ -91,7 +104,13 @@ int main()
 		switch (CurrentState)
 		{
 		case GameState::Battle:
-			ProcessOutcome(MainPlayer, MainEnemy, CurrentMessage, LastPlayerAction, LastEnemyAction);
+			ProcessOutcome(MainPlayer, MainEnemy, CurrentMessage, LastPlayerAction, LastEnemyAction, LastOutcomeType);
+
+			if (LastOutcomeType != CombatOutcomeType::None)
+			{
+				SetSpriteStatesForOutcome(LastOutcomeType, PlayerSprites, EnemySprites,
+					!MainPlayer.IsAlive(), !MainEnemy.IsAlive());
+			}
 
 			if (!MainEnemy.IsAlive())
 			{
@@ -99,10 +118,12 @@ int main()
 				CurrentMessage = GameMessage(
 					MainEnemy.GetName() + " has been defeated by " + MainPlayer.GetName() + "!"
 				);
+				EnemySprites.SetState(SpriteState::Die);
 			}
 			else if (!MainPlayer.IsAlive())
 			{
 				CurrentState = GameState::PlayerDefeated;
+				PlayerSprites.SetState(SpriteState::Die);
 			}
 			break;
 
@@ -121,6 +142,10 @@ int main()
 				else
 				{
 					ResetRound(MainPlayer, MainEnemy, RoundNumber);
+					EnemySprites.UnloadAll();
+					LoadEnemySprites(EnemySprites, RoundNumber);
+					PlayerSprites.SetState(SpriteState::Rest);
+					LastOutcomeType = CombatOutcomeType::None;
 					CurrentState = GameState::Battle;
 				}
 			}
@@ -135,6 +160,8 @@ int main()
 					MainPlayer.GetName() + " has lost a life!",
 					MainPlayer.GetName() + " respawns to continue the battle!"
 				);
+				PlayerSprites.SetState(SpriteState::Rest);
+				LastOutcomeType = CombatOutcomeType::None;
 				CurrentState = GameState::Battle;
 			}
 			else
@@ -152,12 +179,42 @@ int main()
 			break;
 		}
 
+		// Return sprites to Rest when message finishes
+		if (!CurrentMessage.IsActive() && CurrentState == GameState::Battle)
+		{
+			if (PlayerSprites.CurrentState != SpriteState::Rest)
+				PlayerSprites.SetState(SpriteState::Rest);
+			if (EnemySprites.CurrentState != SpriteState::Rest)
+				EnemySprites.SetState(SpriteState::Rest);
+		}
+
 		CurrentMessage.Update();
+		PlayerSprites.Update();
+		EnemySprites.Update();
 
 		// Render
 		BeginDrawing();
 		ClearBackground(GameColors::BACKGROUND);
 		DrawTexture(background, 0, 0, WHITE);
+
+		// Draw character sprites in the arena
+		{
+			const auto& PlayerAnim = PlayerSprites.Current();
+			float PlayerScale = 3.f;//UILayout_Constants::SPRITE_DISPLAY_HEIGHT / PlayerAnim.FrameHeight();
+			float PlayerY = UILayout_Constants::SPRITE_GROUND_Y - (PlayerAnim.FrameHeight() * PlayerScale);
+			PlayerSprites.Draw(
+				{static_cast<float>(UILayout_Constants::PLAYER_SPRITE_X), PlayerY},
+				PlayerScale, false
+			);
+
+			const auto& EnemyAnim = EnemySprites.Current();
+			float EnemyScale = 2.f;//UILayout_Constants::SPRITE_DISPLAY_HEIGHT / EnemyAnim.FrameHeight();
+			float EnemyY = UILayout_Constants::SPRITE_GROUND_Y - (EnemyAnim.FrameHeight() * EnemyScale);
+			EnemySprites.Draw(
+				{static_cast<float>(UILayout_Constants::ENEMY_SPRITE_X), EnemyY},
+				EnemyScale, true
+			);
+		}
 
 		RenderGameState(MainPlayer, MainEnemy, RoundNumber, CurrentMessage, LastPlayerAction, LastEnemyAction);
 
@@ -190,6 +247,8 @@ int main()
 		}
 	}
 
+	PlayerSprites.UnloadAll();
+	EnemySprites.UnloadAll();
 	UnloadTexture(background);
 	CloseWindow();
 	return 0;
@@ -201,70 +260,70 @@ CombatOutcome BuildOutcome(CombatOutcomeType Type, const Player& MainPlayer, con
 	{
 	case CombatOutcomeType::Clash:
 		return {GameMessage("Clash!", "Both warriors exchange blows!"),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::ParriedByEnemy:
 		return {GameMessage(MainEnemy.GetName() + " parries the attack!", "", "", GameMessage::Type::Error),
-			[](Player& P, const Enemy& E) { P.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }};
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }, Type};
 
 	case CombatOutcomeType::BlockedByEnemy:
 		return {GameMessage(MainEnemy.GetName() + " blocks the attack!", "Reduced damage!", "", GameMessage::Type::Warning),
-			[](const Player& P, Enemy& E) { E.UpdateHealth(-((P.GetAttackPower() - E.GetArmor()) / 2)); }};
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-((P.GetAttackPower() - E.GetArmor()) / 2)); }, Type};
 
 	case CombatOutcomeType::HitEnemy:
 		return {GameMessage(MainEnemy.GetName() + " is caught off guard!", "Direct hit!", "", GameMessage::Type::Success),
-			[](const Player& P, Enemy& E) { E.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }};
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-(P.GetAttackPower() - E.GetArmor())); }, Type};
 
 	case CombatOutcomeType::ParriedByPlayer:
 		return {GameMessage(MainPlayer.GetName() + " parries!", "", "", GameMessage::Type::Success),
-			[](const Player& P, Enemy& E) { E.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }};
+			[](const Player& P, Enemy& E) { E.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }, Type};
 
 	case CombatOutcomeType::Deadlock:
 		return {GameMessage("Deadlock!", "Neither lands a blow."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::StandoffParryDefend:
 		return {GameMessage("Tense standoff.", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::ParryRest:
 		return {GameMessage(MainEnemy.GetName() + " gathers strength while " + MainPlayer.GetName() + " tries to thwart an attack!", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::BlockedByPlayer:
 		return {GameMessage(MainPlayer.GetName() + " braces for impact!", "Reduced damage!", "", GameMessage::Type::Warning),
-			[](Player& P, const Enemy& E) { P.UpdateHealth(-((E.GetAttackPower() - P.GetArmor()) / 2)); }};
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-((E.GetAttackPower() - P.GetArmor()) / 2)); }, Type};
 
 	case CombatOutcomeType::DefendParry:
 		return {GameMessage("Mutual defense.", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::BothDefend:
 		return {GameMessage("Both prepare defenses.", "A stalemate ensues."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::DefendRest:
 		return {GameMessage(MainPlayer.GetName() + " prepares to defend while " + MainEnemy.GetName() + " is resting!", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::HitPlayer:
 		return {GameMessage(MainPlayer.GetName() + " is caught resting!", "Direct hit!", "", GameMessage::Type::Error),
-			[](Player& P, const Enemy& E) { P.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }};
+			[](Player& P, const Enemy& E) { P.UpdateHealth(-(E.GetAttackPower() - P.GetArmor())); }, Type};
 
 	case CombatOutcomeType::RestParry:
 		return {GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " tries to thwart an attack!", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::RestDefend:
 		return {GameMessage(MainPlayer.GetName() + " gathers strength while " + MainEnemy.GetName() + " prepares to defend!", "Nothing happens."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	case CombatOutcomeType::BothRest:
 		return {GameMessage("Both warriors rest!", "Respite in battle."),
-			[](Player&, Enemy&) {}};
+			[](Player&, Enemy&) {}, Type};
 
 	default:
-		return {GameMessage("..."), [](Player&, Enemy&) {}};
+		return {GameMessage("..."), [](Player&, Enemy&) {}, CombatOutcomeType::None};
 	}
 }
 
@@ -273,7 +332,8 @@ void ProcessOutcome(
 	Enemy& MainEnemy,
 	GameMessage& Message,
 	CharacterAction& OutPlayerAction,
-	CharacterAction& OutEnemyAction)
+	CharacterAction& OutEnemyAction,
+	CombatOutcomeType& OutOutcomeType)
 {
 	CharacterAction PlayerAction = MainPlayer.ChooseAction();
 	if (PlayerAction == CharacterAction::None) return;
@@ -303,15 +363,22 @@ void ProcessOutcome(
 
 	// Early return if either was forced to rest due to exhaustion
 	if (PlayerAction == CharacterAction::Rest && OutPlayerAction != PlayerAction)
+	{
+		OutOutcomeType = CombatOutcomeType::BothRest;
 		return;
+	}
 	if (EnemyAction == CharacterAction::Rest && OutEnemyAction != EnemyAction)
+	{
+		OutOutcomeType = CombatOutcomeType::BothRest;
 		return;
+	}
 
 	auto it = OutcomeTypeMap.find({PlayerAction, EnemyAction});
 	if (it == OutcomeTypeMap.end()) return;
 
 	CombatOutcome Outcome = BuildOutcome(it->second, MainPlayer, MainEnemy);
 	Message = Outcome.Message;
+	OutOutcomeType = Outcome.Type;
 	Outcome.ResolveEffects(MainPlayer, MainEnemy);
 }
 
@@ -375,4 +442,105 @@ void ResetRound(Player& MainPlayer, Enemy& MainEnemy, int RoundNumber)
 	MainEnemy.SetDefaultBaseValues();
 	MainPlayer.LevelUp(RoundNumber);
 	MainEnemy.IncreaseDifficultyTo(RoundNumber);
+}
+
+void LoadEnemySprites(CharacterSprites& EnemySprites, int RoundNumber)
+{
+	if (RoundNumber >= 1 && RoundNumber <= GameConstants::MAX_ROUNDS)
+	{
+		const CharacterSpriteConfig* Config = ImageStore::EnemySpritesByRound[RoundNumber];
+		if (Config)
+			EnemySprites.LoadFromConfig(*Config);
+	}
+}
+
+void SetSpriteStatesForOutcome(
+	CombatOutcomeType Type,
+	CharacterSprites& PlayerSprites,
+	CharacterSprites& EnemySprites,
+	bool PlayerDead,
+	bool EnemyDead)
+{
+	if (PlayerDead)
+	{
+		PlayerSprites.SetState(SpriteState::Die);
+		return;
+	}
+	if (EnemyDead)
+	{
+		EnemySprites.SetState(SpriteState::Die);
+		return;
+	}
+
+	switch (Type)
+	{
+	case CombatOutcomeType::Clash:
+		PlayerSprites.SetState(SpriteState::Attack);
+		EnemySprites.SetState(SpriteState::Attack);
+		break;
+	case CombatOutcomeType::ParriedByEnemy:
+		PlayerSprites.SetState(SpriteState::Hurt);
+		EnemySprites.SetState(SpriteState::Parry);
+		break;
+	case CombatOutcomeType::BlockedByEnemy:
+		PlayerSprites.SetState(SpriteState::Attack);
+		EnemySprites.SetState(SpriteState::Defend);
+		break;
+	case CombatOutcomeType::HitEnemy:
+		PlayerSprites.SetState(SpriteState::Attack);
+		EnemySprites.SetState(SpriteState::Hurt);
+		break;
+	case CombatOutcomeType::ParriedByPlayer:
+		PlayerSprites.SetState(SpriteState::Parry);
+		EnemySprites.SetState(SpriteState::Hurt);
+		break;
+	case CombatOutcomeType::Deadlock:
+		PlayerSprites.SetState(SpriteState::Parry);
+		EnemySprites.SetState(SpriteState::Parry);
+		break;
+	case CombatOutcomeType::StandoffParryDefend:
+		PlayerSprites.SetState(SpriteState::Parry);
+		EnemySprites.SetState(SpriteState::Defend);
+		break;
+	case CombatOutcomeType::ParryRest:
+		PlayerSprites.SetState(SpriteState::Parry);
+		EnemySprites.SetState(SpriteState::Rest);
+		break;
+	case CombatOutcomeType::BlockedByPlayer:
+		PlayerSprites.SetState(SpriteState::Defend);
+		EnemySprites.SetState(SpriteState::Attack);
+		break;
+	case CombatOutcomeType::DefendParry:
+		PlayerSprites.SetState(SpriteState::Defend);
+		EnemySprites.SetState(SpriteState::Parry);
+		break;
+	case CombatOutcomeType::BothDefend:
+		PlayerSprites.SetState(SpriteState::Defend);
+		EnemySprites.SetState(SpriteState::Defend);
+		break;
+	case CombatOutcomeType::DefendRest:
+		PlayerSprites.SetState(SpriteState::Defend);
+		EnemySprites.SetState(SpriteState::Rest);
+		break;
+	case CombatOutcomeType::HitPlayer:
+		PlayerSprites.SetState(SpriteState::Hurt);
+		EnemySprites.SetState(SpriteState::Attack);
+		break;
+	case CombatOutcomeType::RestParry:
+		PlayerSprites.SetState(SpriteState::Rest);
+		EnemySprites.SetState(SpriteState::Parry);
+		break;
+	case CombatOutcomeType::RestDefend:
+		PlayerSprites.SetState(SpriteState::Rest);
+		EnemySprites.SetState(SpriteState::Defend);
+		break;
+	case CombatOutcomeType::BothRest:
+		PlayerSprites.SetState(SpriteState::Rest);
+		EnemySprites.SetState(SpriteState::Rest);
+		break;
+	default:
+		PlayerSprites.SetState(SpriteState::Rest);
+		EnemySprites.SetState(SpriteState::Rest);
+		break;
+	}
 }

@@ -77,6 +77,9 @@
     <ClInclude Include="Logger.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers\SpriteAnimation.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="SourceArt\Arena.png">

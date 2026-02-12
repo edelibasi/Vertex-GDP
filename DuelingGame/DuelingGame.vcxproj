@@ -444,6 +444,7 @@
     <ClInclude Include="Classes\Player.h" />
     <ClInclude Include="Helpers\GameMessage.h" />
     <ClInclude Include="Helpers\ImageStore.h" />
+    <ClInclude Include="Helpers\SpriteAnimation.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="SourceArt\Arena.png" />

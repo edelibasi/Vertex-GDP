@@ -51,4 +51,10 @@ struct UILayout_Constants
 	static constexpr int STAT_X_ENEMY = STAT_X + 400;
 	static constexpr int STAT_Y_START = 320;
 	static constexpr int STAT_Y_SPACING = 25;
+
+	// Sprite Rendering
+	static constexpr int PLAYER_SPRITE_X = 120;
+	static constexpr int ENEMY_SPRITE_X = 500;
+	static constexpr int SPRITE_GROUND_Y = 350;
+	static constexpr float SPRITE_DISPLAY_HEIGHT = 150.0f;
 };
