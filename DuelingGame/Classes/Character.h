@@ -8,14 +8,15 @@ enum class CharacterAction : uint8_t
 
 static std::string GetActionName(CharacterAction Action)
 {
-	switch (Action) {
+	switch (Action)
+	{
 	case CharacterAction::None: return "None";
 	case CharacterAction::Attack: return "Attack";
 	case CharacterAction::Parry: return "Parry";
 	case CharacterAction::Defend: return "Defend";
 	case CharacterAction::Rest: return "Rest";
-	default: return "Unknown Action";
 	}
+	return "Unknown Action";
 }
 
 class Character
