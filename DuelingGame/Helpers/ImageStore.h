@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <unordered_map>
+
 #include "SpriteAnimation.h"
 
 namespace ImageStore
@@ -7,7 +7,7 @@ namespace ImageStore
     static const char* Background = "./SourceArt/Arena.png";
 
     // Sprite configs indexed by SpriteState: Rest, Attack, Parry, Defend, Hurt, Die
-    static const std::unordered_map<SpriteState, SpriteSheetConfig> KnightSpriteMap = {
+    static const std::map<SpriteState, SpriteSheetConfig> KnightSpriteMap = {
         {SpriteState::Attack, {"./SourceArt/Characters/Knight/Attack.png", 1, 5, 5}},
         {SpriteState::Defend, {"./SourceArt/Characters/Knight/Defend.png", 1, 5, 5}},
         {SpriteState::Die, {"./SourceArt/Characters/Knight/Dead.png", 1, 6, 6}},
@@ -16,7 +16,7 @@ namespace ImageStore
         {SpriteState::Rest, {"./SourceArt/Characters/Knight/Idle.png", 1, 4, 4}}
     };
     
-    static const std::unordered_map<std::pair<EnemyType, SpriteState>, SpriteSheetConfig> EnemySpriteMap = {
+    static const std::map<std::pair<EnemyType, SpriteState>, SpriteSheetConfig> EnemySpriteMap = {
         {{EnemyType::SkeletonSpearman, SpriteState::Attack}, {"./SourceArt/Characters/Skeleton-Spearman/Attack.png", 1,4, 4}},
         {{EnemyType::SkeletonSpearman, SpriteState::Defend}, {"./SourceArt/Characters/Skeleton-Spearman/Defend.png", 1, 2, 2}},
         {{EnemyType::SkeletonSpearman, SpriteState::Die}, {"./SourceArt/Characters/Skeleton-Spearman/Dead.png", 1, 5, 5}},

@@ -84,10 +84,10 @@ int main()
 	GameMessage CurrentMessage = GameMessage();
 	CharacterAction LastPlayerAction = CharacterAction::None;
 	CharacterAction LastEnemyAction = CharacterAction::None;
-	Texture2D background = LoadTexture(ImageStore::Background.c_str());
+	Texture2D background = LoadTexture(ImageStore::Background);
 	
 	if (background.id == 0)
-		TraceLog(LOG_WARNING, "Failed to load background texture: %s", ImageStore::Background.c_str());
+		TraceLog(LOG_WARNING, "Failed to load background texture: %s", ImageStore::Background);
 
 	while (!WindowShouldClose())
 	{
