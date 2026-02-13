@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <string>
-#include "ImageStore.h"
 #include "raylib.h"
 
 enum class SpriteState : uint8_t
@@ -11,8 +10,7 @@ enum class SpriteState : uint8_t
     Parry,
     Defend,
     Hurt,
-    Die,
-    Idle
+    Die
 };
 
 struct SpriteSheetConfig {

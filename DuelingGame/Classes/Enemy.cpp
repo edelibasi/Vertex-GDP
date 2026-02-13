@@ -23,29 +23,22 @@ void Enemy::IncreaseDifficultyTo(int RoundNumber)
 		return;
 
 	case 2:
-		Name = "Goblin Warrior";
+		Name = "Skeleton Warrior";
 		UpdateHealth(RoundNumber * 10);
 		
 		break;
 	case 3:
-		Name = "Gladiator";
+		Name = "Viking";
 		UpdateHealth(RoundNumber * 10);
 		UpdateAttackPower(RoundNumber * 10);
 		
 		break;
 	case 4:
-		Name = "Berserker";
+		Name = "Norman Warrior";
 		UpdateHealth(RoundNumber * 10);
 		UpdateAttackPower(RoundNumber * 10);
 		
 		break;
-	case 5:
-		Name = "Knight Champion";
-		UpdateHealth(RoundNumber * 10);
-		UpdateAttackPower(RoundNumber * 10);
-		UpdateArmor((RoundNumber * 10) / 2);
-		break;
-
 	default:
 		break;
 	}

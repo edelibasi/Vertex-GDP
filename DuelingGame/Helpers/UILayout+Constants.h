@@ -13,7 +13,7 @@ struct GameColors
 struct GameConstants
 {
 	static constexpr int TARGET_FPS = 60;
-	static constexpr int MAX_ROUNDS = 5;
+	static constexpr int MAX_ROUNDS = 4;
 	static constexpr int MESSAGE_DISPLAY_TIME = 180; // frames at 60 FPS = 2 seconds
 };
 
