@@ -78,7 +78,7 @@ int main()
 	SetTargetFPS(GameConstants::TARGET_FPS);
 
 	Player MainPlayer("Hero", 100, 100, 3, 20, 10);
-	Enemy MainEnemy("Goblin", 80, 100, 1, 15, 0);
+	Enemy MainEnemy("Skeleton Spearman", 80, 100, 1, 15, 0);
 	int RoundNumber = 1;
 	GameState CurrentState = GameState::Battle;
 	GameMessage CurrentMessage = GameMessage();

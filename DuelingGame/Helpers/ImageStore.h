@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <unordered_map>
+
 #include "SpriteAnimation.h"
 
 namespace ImageStore
@@ -6,59 +8,52 @@ namespace ImageStore
     static const std::string Background = "./SourceArt/Arena.png";
 
     // Sprite configs indexed by SpriteState: Rest, Attack, Parry, Defend, Hurt, Die
-    static const SpriteSheetConfig KnightSprites = {{
-        {"./SourceArt/Characters/Knight/KNIGHT-REST.png",    7, 1,  7},
-        {"./SourceArt/Characters/Knight/KNIGHT-ATTACK.png",  6, 1,  6},
-        {"./SourceArt/Characters/Knight/KNIGHT-PARRY.png",   5, 1,  5},
-        {"./SourceArt/Characters/Knight/KNIGHT-DEFEND.png",  6, 1,  6},
-        {"./SourceArt/Characters/Knight/KNIGHT-HURT.png",    4, 1,  4},
-        {"./SourceArt/Characters/Knight/KNIGHT-DIE.png",    10, 1, 10}
-    }};
-
-    static const CharacterSpriteConfig GoblinSprites = {{
-        {"./SourceArt/Characters/Goblin/GOBLIN-REST.png",    3, 3,  9},
-        {"./SourceArt/Characters/Goblin/GOBLIN-ATTACK.png",  4, 3, 11},
-        {"./SourceArt/Characters/Goblin/GOBLIN-PARRY.png",   4, 3, 10},
-        {"./SourceArt/Characters/Goblin/GOBLIN-DEFEND.png",  3, 3,  9},
-        {"./SourceArt/Characters/Goblin/GOBLIN-HURT.png",    2, 2,  4},
-        {"./SourceArt/Characters/Goblin/GOBLIN-DIE.png",     4, 3, 11}
-    }};
-
-    static const CharacterSpriteConfig GoblinWarriorSprites = {{
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-REST.png",    3, 3,  9},
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-ATTACK.png",  4, 3, 11},
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-PARRY.png",   4, 3, 10},
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-DEFEND.png",  3, 3,  9},
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-HURT.png",    2, 2,  4},
-        {"./SourceArt/Characters/Goblin-Warrior/GOBLIN-WARRIOR-DIE.png",     4, 3, 11}
-    }};
-
-    static const CharacterSpriteConfig GoblinBossSprites = {{
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-REST.png",    6, 3, 18},
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-ATTACK.png",  6, 4, 24},
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-PARRY.png",   6, 4, 24},
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-DEFEND.png",  6, 3, 18},
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-HURT.png",    6, 3, 18},
-        {"./SourceArt/Characters/Goblin-Boss/GOBLIN-BOSS-DIE.png",     3, 3,  9}
-    }};
-
-    static const CharacterSpriteConfig GoblinGiantSprites = {{
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-REST.png",    5, 3, 15},
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-ATTACK.png",  6, 4, 22},
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-PARRY.png",   6, 4, 22},
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-DEFEND.png",  5, 4, 20},
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-HURT.png",    5, 4, 20},
-        {"./SourceArt/Characters/Goblin-Giant/GOBLIN-GIANT-DIE.png",     5, 3, 13}
-    }};
-
-    // Enemy sprite config per round (1-indexed, index 0 unused)
-    static const CharacterSpriteConfig* EnemySpritesByRound[] = {
-        nullptr,              // Round 0 (unused)
-        &GoblinSprites,       // Round 1: Goblin
-        &GoblinWarriorSprites,// Round 2: Goblin Warrior
-        &GoblinBossSprites,   // Round 3: Gladiator
-        &GoblinGiantSprites,  // Round 4: Berserker
-        &KnightSprites        // Round 5: Knight Champion
+    static const std::unordered_map<SpriteState, SpriteSheetConfig> KnightSpriteMap = {
+        {SpriteState::Attack, {"./SourceArt/Characters/Knight/Attack.png", 1, 5, 5}},
+        {SpriteState::Defend, {"./SourceArt/Characters/Knight/Defend.png", 1, 5, 5}},
+        {SpriteState::Die, {"./SourceArt/Characters/Knight/Dead.png", 1, 6, 6}},
+        {SpriteState::Hurt, {"./SourceArt/Characters/Knight/Hurt.png", 1, 2, 2}},
+        {SpriteState::Parry, {"./SourceArt/Characters/Knight/Parry.png", 1, 4, 4}},
+        {SpriteState::Rest, {"./SourceArt/Characters/Knight/Idle.png", 1, 4, 4}}
     };
+    
+    static const std::unordered_map<std::pair<EnemyType, SpriteState>, SpriteSheetConfig> EnemySpriteMap = {
+        {{EnemyType::SkeletonSpearman, SpriteState::Attack}, {"./SourceArt/Characters/Skeleton-Spearman/Attack.png", 1,4, 4}},
+        {{EnemyType::SkeletonSpearman, SpriteState::Defend}, {"./SourceArt/Characters/Skeleton-Spearman/Defend.png", 1, 2, 2}},
+        {{EnemyType::SkeletonSpearman, SpriteState::Die}, {"./SourceArt/Characters/Skeleton-Spearman/Dead.png", 1, 5, 5}},
+        {{EnemyType::SkeletonSpearman, SpriteState::Hurt}, {"./SourceArt/Characters/Skeleton-Spearman/Hurt.png", 1, 3, 3}},
+        {{EnemyType::SkeletonSpearman, SpriteState::Parry}, {"./SourceArt/Characters/Skeleton-Spearman/Parry.png", 1, 4, 4}},
+        {{EnemyType::SkeletonSpearman, SpriteState::Rest}, {"./SourceArt/Characters/Skeleton-Spearman/Idle.png", 1, 7, 7}},
+
+        {{EnemyType::SkeletonWarrior, SpriteState::Attack}, {"./SourceArt/Characters/Skeleton-Warrior/Attack.png", 1, 5, 5}},
+        {{EnemyType::SkeletonWarrior, SpriteState::Defend}, {"./SourceArt/Characters/Skeleton-Warrior/Defend.png", 1, 1, 1}},
+        {{EnemyType::SkeletonWarrior, SpriteState::Die}, {"./SourceArt/Characters/Skeleton-Warrior/Dead.png", 1, 4, 4}},
+        {{EnemyType::SkeletonWarrior, SpriteState::Hurt}, {"./SourceArt/Characters/Skeleton-Warrior/Hurt.png", 1, 2, 2}},
+        {{EnemyType::SkeletonWarrior, SpriteState::Parry}, {"./SourceArt/Characters/Skeleton-Warrior/Parry.png", 1, 6, 6}},
+        {{EnemyType::SkeletonWarrior, SpriteState::Rest}, {"./SourceArt/Characters/Skeleton-Warrior/Idle.png", 1, 7, 7}},
+
+        {{EnemyType::Viking, SpriteState::Attack}, {"./SourceArt/Characters/Viking/Attack.png", 1, 4, 4}},
+        {{EnemyType::Viking, SpriteState::Defend}, {"./SourceArt/Characters/Viking/Defend.png", 1, 3, 3}},
+        {{EnemyType::Viking, SpriteState::Die}, {"./SourceArt/Characters/Viking/Dead.png", 1, 4, 4}},
+        {{EnemyType::Viking, SpriteState::Hurt}, {"./SourceArt/Characters/Viking/Hurt.png", 1, 2, 2}},
+        {{EnemyType::Viking, SpriteState::Parry}, {"./SourceArt/Characters/Viking/Parry.png", 1, 3, 3}},
+        {{EnemyType::Viking, SpriteState::Rest}, {"./SourceArt/Characters/Viking/Idle.png", 1, 5, 5}},
+
+        {{EnemyType::NormanWarrior, SpriteState::Attack}, {"./SourceArt/Characters/Norman-Warrior/Attack.png", 1, 4, 4}},
+        {{EnemyType::NormanWarrior, SpriteState::Defend}, {"./SourceArt/Characters/Norman-Warrior/Defend.png", 1, 2, 2}},
+        {{EnemyType::NormanWarrior, SpriteState::Die}, {"./SourceArt/Characters/Norman-Warrior/Dead.png", 1, 4, 4}},
+        {{EnemyType::NormanWarrior, SpriteState::Hurt}, {"./SourceArt/Characters/Norman-Warrior/Hurt.png", 1, 3, 3}},
+        {{EnemyType::NormanWarrior, SpriteState::Parry}, {"./SourceArt/Characters/Norman-Warrior/Parry.png", 1, 4, 4}},
+        {{EnemyType::NormanWarrior, SpriteState::Rest}, {"./SourceArt/Characters/Norman-Warrior/Idle.png", 1, 5, 5}}
+    };
+
+    static SpriteSheetConfig getEnemySpriteSheetConfig(EnemyType Type, SpriteState State)
+    {
+        auto it = EnemySpriteMap.find({Type, State});
+        if (it != EnemySpriteMap.end())
+            return it->second;
+        else
+            return {"", 0, 0, 0}; // Return an empty config if not found
+    }
 };
 

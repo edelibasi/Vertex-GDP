@@ -2,6 +2,14 @@
 #include "Character.h"
 #include <random>
 
+enum class EnemyType : uint8_t
+{
+	SkeletonSpearman = 1,
+	SkeletonWarrior,
+	Viking,
+	NormanWarrior
+};
+
 class Enemy : public Character
 {
 public:
