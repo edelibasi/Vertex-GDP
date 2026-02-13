@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include <unordered_map>
-
 #include "SpriteAnimation.h"
 
 namespace ImageStore
 {
-    static const std::string Background = "./SourceArt/Arena.png";
+    static const char* Background = "./SourceArt/Arena.png";
 
     // Sprite configs indexed by SpriteState: Rest, Attack, Parry, Defend, Hurt, Die
     static const std::unordered_map<SpriteState, SpriteSheetConfig> KnightSpriteMap = {
@@ -46,11 +45,11 @@ namespace ImageStore
         {{EnemyType::NormanWarrior, SpriteState::Parry}, {"./SourceArt/Characters/Norman-Warrior/Parry.png", 1, 4, 4}},
         {{EnemyType::NormanWarrior, SpriteState::Rest}, {"./SourceArt/Characters/Norman-Warrior/Idle.png", 1, 5, 5}}
     };
-
-    static SpriteSheetConfig getEnemySpriteSheetConfig(EnemyType Type, SpriteState State)
+    
+    static SpriteSheetConfig GetEnemySpriteSheetConfig(EnemyType Type, SpriteState State)
     {
-        auto it = EnemySpriteMap.find({Type, State});
-        if (it != EnemySpriteMap.end())
+        auto it = ImageStore::EnemySpriteMap.find({Type, State});
+        if (it != ImageStore::EnemySpriteMap.end())
             return it->second;
         else
             return {"", 0, 0, 0}; // Return an empty config if not found

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <string>
+#include "ImageStore.h"
 #include "raylib.h"
 
 enum class SpriteState : uint8_t
@@ -12,6 +13,13 @@ enum class SpriteState : uint8_t
     Hurt,
     Die,
     Idle
+};
+
+struct SpriteSheetConfig {
+    const char* ImagePath;
+    int Rows;
+    int Columns;
+    int FrameCount;
 };
 
 struct SpriteAnimation
@@ -55,11 +63,4 @@ struct SpriteAnimation
         if (Sheet.id != 0) UnloadTexture(Sheet);
         Sheet = {};
     }
-};
-
-struct SpriteSheetConfig {
-    const char* ImagePath;
-    int Rows;
-    int Columns;
-    int FrameCount;
 };
