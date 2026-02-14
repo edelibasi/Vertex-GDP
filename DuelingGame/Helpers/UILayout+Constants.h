@@ -43,4 +43,11 @@ struct UILayout_Constants
 	static constexpr int MESSAGE_LINE1_Y = MESSAGE_Y_START;
 	static constexpr int MESSAGE_LINE2_Y = MESSAGE_Y_START + MESSAGE_Y_SPACING;
 	static constexpr int MESSAGE_LINE3_Y = MESSAGE_Y_START + (MESSAGE_Y_SPACING * 2);
+	
+	// Sprite Rendering
+	static constexpr int PLAYER_SPRITE_X = 120;
+	static constexpr int ENEMY_SPRITE_X = 500;
+	static constexpr int SPRITE_GROUND_Y = 350;
+	static constexpr float SPRITE_DISPLAY_WIDTH = 128.0f;
+	static constexpr float SPRITE_DISPLAY_HEIGHT = 128.0f;
 };
